@@ -1,3 +1,4 @@
+import 'package:contactsapp/screens/home.dart';
 import 'package:contactsapp/screens/splash.dart';
 import 'package:contactsapp/utils/AppRoutes.dart';
 import 'package:flutter/material.dart';
@@ -14,6 +15,7 @@ class ContactsApp extends StatelessWidget {
       initialRoute:AppRoutes.splashScreen,
       routes: {
         AppRoutes.splashScreen: (context) => const SplashScreen(),
+        AppRoutes.homeScreen: (context) => const HomeScreen(),
 
       },
     );
