@@ -12,6 +12,7 @@ class AddContactSheet extends StatefulWidget {
 }
 
 class _AddContactSheetState extends State<AddContactSheet> {
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController nameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController phoneController = TextEditingController();
@@ -43,12 +44,46 @@ class _AddContactSheetState extends State<AddContactSheet> {
         ),
       );
     }
-    Widget _field(String hint,TextEditingController controller,{TextInputType type=TextInputType.text}){
+    String? _validateName(String? value){
+      if(value==null||value.isEmpty){
+        return "Pls Enter Name";
+      }
+      if (value.length < 3) {
+        return "Name must be at least 3 characters";
+      }
+      return null;
+    }
+    String? _validateEmail(String? value){
+      final emailReg=RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+      if(value==null||value.isEmpty){
+        return "Pls Enter Email";
+      }
+      if (!emailReg.hasMatch(value)) {
+        return "Invalid Email";
+      }
+      return null;
+    }
+    String? _validatePhone(String? value){
+      if(value==null||value.isEmpty){
+        return "Pls Enter Phone Number";
+      }
+      final phoneReg = RegExp(r'^01[0-9]{9}$');
+      if (!phoneReg.hasMatch(value)) {
+        return "It Should Start With 01 and Contain 11 Number";
+      }
+      return null;
+    }
+
+    Widget _field(String hint,TextEditingController controller,{TextInputType type=TextInputType.text,
+      String? Function(String?)? validator,}) {
       return Padding(
         padding: const EdgeInsets.symmetric(horizontal:16,vertical: 8),
         child: TextFormField(
           controller: controller,
           onChanged: (value) => setState(() {}),
+          validator: validator,
+          autovalidateMode: AutovalidateMode.onUserInteraction,
+
 
           keyboardType: type,
           cursorColor: AppColors.gold,
@@ -89,74 +124,80 @@ class _AddContactSheetState extends State<AddContactSheet> {
     return Padding(
       padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
       child: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
+        child: Form(
+          key: _formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
 
-          children: [
-            Row(
-              children: [
-                Container(
-                  margin: EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(24),
-                    border: Border.all(color: AppColors.gold,width: 1.5)
-                  ),
-
-                  child: Lottie.asset(AppAnimations.imagePicker,
-                      height: MediaQuery.of(context).size.height*0.2,
-                      width: MediaQuery.of(context).size.height*0.2
-                  ),
-                ),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _previewLine("User Name",nameController.text),
-                      _divider(),
-                      _previewLine("example@email.com",emailController.text),
-                      _divider(),
-                      _previewLine("+200000000000",phoneController.text),
-                    ],
-                  ),
-                )
-              ],
-            ),
-            _field("Enter User Name ",nameController),
-            _field("Enter User Email ",type: TextInputType.emailAddress,emailController),
-            _field("Enter User Phone",type:TextInputType.phone,phoneController),
-            if(!isKeyboardOpen)
-            Padding(
-              padding:  EdgeInsets.only(left:16,right: 16,top: 16,
-                bottom:16
-              ),
-              child: SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(onPressed: (){
-                  Navigator.pop(context,Contact(
-                      name: nameController.text,
-                      email: emailController.text,
-                      phone: phoneController.text)
-                  );
-                },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor:AppColors.gold,
-                    foregroundColor: AppColors.darkBlue,
-                    padding: EdgeInsets.all(16),
-                    overlayColor: Colors.transparent,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16)
+            children: [
+              Row(
+                children: [
+                  Container(
+                    margin: EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(24),
+                      border: Border.all(color: AppColors.gold,width: 1.5)
                     ),
 
+                    child: Lottie.asset(AppAnimations.imagePicker,
+                        height: MediaQuery.of(context).size.height*0.2,
+                        width: MediaQuery.of(context).size.height*0.2
+                    ),
                   ),
-                  child: Text("Enter user",style: TextStyle(fontSize: 20,fontWeight: FontWeight.w400),),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _previewLine("User Name",nameController.text),
+                        _divider(),
+                        _previewLine("example@email.com",emailController.text),
+                        _divider(),
+                        _previewLine("+200000000000",phoneController.text),
+                      ],
+                    ),
+                  )
+                ],
+              ),
+              _field("Enter User Name ",nameController,validator:_validateName),
+              _field("Enter User Email ",emailController,type: TextInputType.emailAddress,validator: _validateEmail),
+              _field("Enter User Phone",phoneController,type:TextInputType.phone,validator:_validatePhone),
+              if(!isKeyboardOpen)
+              Padding(
+                padding:  EdgeInsets.only(left:16,right: 16,top: 16,
+                  bottom:16
+                ),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(onPressed: (){
+                    if(_formKey.currentState!.validate()){
+                      Navigator.pop(context,Contact(
+                          name: nameController.text,
+                          email: emailController.text,
+                          phone: phoneController.text)
+                      );
+                    }
 
+                  },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor:AppColors.gold,
+                      foregroundColor: AppColors.darkBlue,
+                      padding: EdgeInsets.all(16),
+                      overlayColor: Colors.transparent,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16)
+                      ),
+
+                    ),
+                    child: Text("Enter user",style: TextStyle(fontSize: 20,fontWeight: FontWeight.w400),),
+
+                  ),
                 ),
               ),
-            ),
 
 
 
-          ],
+            ],
+          ),
         ),
       ),
     );
