@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:contactsapp/Data/contactData.dart';
 import 'package:contactsapp/utils/AppColors.dart';
 import 'package:contactsapp/utils/AppImages.dart';
@@ -5,7 +7,8 @@ import 'package:flutter/material.dart';
 
 class ContactCard extends StatelessWidget {
   final Contact contact;
-   ContactCard({super.key,required this.contact});
+  final VoidCallback onDelete;
+  ContactCard({super.key,required this.contact,required this.onDelete});
   Widget _contactinfo(IconData icon,String info){
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal:8),
@@ -39,7 +42,13 @@ class ContactCard extends StatelessWidget {
             child: Stack(
               children: [
                 Positioned.fill(
-                    child: Image.asset(AppImages.forMe,fit: BoxFit.cover,)),
+                    child: (contact.imagePath != null && contact.imagePath!.isNotEmpty)
+                        ? Image.file(                      
+                      File(contact.imagePath!),
+                      fit: BoxFit.cover,
+                    )
+                        : Icon(Icons.person_outline)
+                ),
                 Positioned(
                   left: 8,
                     bottom: 8,
@@ -89,7 +98,9 @@ class ContactCard extends StatelessWidget {
                             borderRadius: BorderRadius.circular(8)
                         )
                     ),
-                        onPressed: (){},
+                        onPressed: (){
+                      onDelete();
+                        },
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [

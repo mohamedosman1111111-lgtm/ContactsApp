@@ -5,7 +5,8 @@ import 'package:flutter/material.dart';
 
 class ContactState extends StatelessWidget {
   final List<Contact> contacts;
-   ContactState({super.key,required this.contacts});
+  final Function(Contact)onDelete;
+   ContactState({super.key,required this.contacts,required this.onDelete});
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +20,7 @@ class ContactState extends StatelessWidget {
 
       ),
 
-         itemBuilder:(context, index)=>ContactCard(contact:contacts[index]),
+         itemBuilder:(context, index)=>ContactCard(contact:contacts[index],onDelete:()=> onDelete(contacts[index]),),
     itemCount:contacts.length ,
     );
   }

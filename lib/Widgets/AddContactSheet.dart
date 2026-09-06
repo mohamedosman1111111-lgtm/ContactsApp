@@ -1,3 +1,5 @@
+import 'dart:io';
+import 'package:image_picker/image_picker.dart';
 import 'package:contactsapp/Data/contactData.dart';
 import 'package:contactsapp/utils/AppAnimations.dart';
 import 'package:contactsapp/utils/AppColors.dart';
@@ -22,6 +24,17 @@ class _AddContactSheetState extends State<AddContactSheet> {
     emailController.dispose();
     phoneController.dispose();
     super.dispose();
+  }
+  XFile? pickedImage;
+  Future <void> pickImage()async{
+    final ImagePicker picker=ImagePicker();
+    final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+if(image!=null){
+  setState(() {
+    pickedImage=image;
+  });
+}
+
   }
   @override
   Widget build(BuildContext context) {
@@ -132,16 +145,30 @@ class _AddContactSheetState extends State<AddContactSheet> {
             children: [
               Row(
                 children: [
-                  Container(
-                    margin: EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(24),
-                      border: Border.all(color: AppColors.gold,width: 1.5)
-                    ),
+                  GestureDetector(
+                    onTap: pickImage,
+                    child: Container(
+                      margin: EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(24),
+                        border: Border.all(color: AppColors.gold,width: 1.5)
+                      ),
 
-                    child: Lottie.asset(AppAnimations.imagePicker,
-                        height: MediaQuery.of(context).size.height*0.2,
-                        width: MediaQuery.of(context).size.height*0.2
+                      child:pickedImage==null?
+                      Lottie.asset(AppAnimations.imagePicker,
+                          height: MediaQuery.of(context).size.height*0.2,
+                          width: MediaQuery.of(context).size.height*0.2
+
+
+                      ):
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(24),
+                        child: Image.file(
+                          File(pickedImage!.path),
+                          height: MediaQuery.of(context).size.height * 0.2,
+                          width: MediaQuery.of(context).size.height * 0.2,
+                        ),
+                      ),
                     ),
                   ),
                   Expanded(
@@ -173,7 +200,10 @@ class _AddContactSheetState extends State<AddContactSheet> {
                       Navigator.pop(context,Contact(
                           name: nameController.text,
                           email: emailController.text,
-                          phone: phoneController.text)
+                          phone: phoneController.text,
+                        imagePath: pickedImage?.path
+                      )
+
                       );
                     }
 
